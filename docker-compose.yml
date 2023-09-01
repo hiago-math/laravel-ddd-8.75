@@ -23,7 +23,7 @@ services:
 
     app:
         container_name: app
-        hostname: api-app.localhost
+        hostname: laravel-ddd-exaple.localhost
         links:
             - mysql
         build:
@@ -65,7 +65,7 @@ services:
         container_name: app_redis
         env_file:
           - .env
-        hostname: api-app.redis
+        hostname: laravel-ddd-example.redis
         image: redis
         ports:
           - "${REDIS_PORT}:${REDIS_PORT}"
