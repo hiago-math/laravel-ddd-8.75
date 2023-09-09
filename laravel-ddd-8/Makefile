@@ -1,20 +1,29 @@
+include .env
 
-# Nome do serviço que você deseja executar o comando
-SERVICE_NAME = my-service
+setup:
+	@export APP_URL=${APP_URL}; \
+	@export APP_NAME=${APP_NAME}; \
+	export NGINX_HOST_HTTP_PORT=${NGINX_HOST_HTTP_PORT}; \
 
-# Comando que você deseja executar no serviço
-COMMAND = npm test
-
-# Iniciar o ambiente com Docker Compose
 start:
-	docker-compose up -d
-	composer install
-	cp .env.example .env
+	@echo "Iniciando projeto..."
+	@echo "Copiando .env.example do projeto..."
+	@cp .env.example .env
+	@echo "Iniciando container..."
+	@docker-compose up -d --build
+	@echo "Instalando composer..."
+	@docker-compose exec app composer install
+	@echo "Gerando chave do projeto..."
+	@docker-compose exec app php artisan key:generate
+	@echo "Rodando migrate..."
+	@docker-compose exec app php artisan migrate
+	@echo "Comando 'make start' executado com sucesso."
+	@echo "URL API ${APP_URL}:${NGINX_HOST_HTTP_PORT}/api"
+	@echo "URL WEB ${APP_URL}:${NGINX_HOST_HTTP_PORT}"
 
-# Executar o comando no serviço especificado
-exec:
-	docker-compose exec $(SERVICE_NAME) $(COMMAND)
+shell-app:
+	@sudo chmod -R 777 ./
+	@docker-compose exec app bash
 
-# Parar o ambiente com Docker Compose
 stop:
-	docker-compose down
+	@docker-compose down
