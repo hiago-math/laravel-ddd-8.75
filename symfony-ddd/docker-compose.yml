@@ -43,20 +43,18 @@ services:
 
     mysql:
         container_name: app_mysql
+        restart: always
         env_file:
           - .env
-        build:
-            context: ./docker/build/mysql
-            dockerfile: Dockerfile
+        image: mysql:latest
         ports:
             - "${MYSQL_PORT}:${MYSQL_PORT}"
         volumes:
             - database:/var/lib/mysql
         environment:
-            - MYSQL_DATABASE=${MYSQL_DATABASE}
-            - MYSQL_USER=${MYSQL_USER}
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_PASSWORD=root
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSAL_ROOT_HOST=%
         networks:
             - MyNetwork
     redis:
