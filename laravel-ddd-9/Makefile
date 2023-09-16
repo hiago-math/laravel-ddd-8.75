@@ -22,7 +22,6 @@ start:
 	@echo "URL WEB ${APP_URL}:${NGINX_HOST_HTTP_PORT}"
 
 shell-app:
-	@sudo chmod -R 777 ./
 	@docker-compose exec app bash
 
 stop:
