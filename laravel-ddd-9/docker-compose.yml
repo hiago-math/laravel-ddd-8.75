@@ -23,9 +23,9 @@ services:
 
     app:
         container_name: app
-        hostname: laravel-ddd-exaple.localhost
+        hostname: ${APP_NAME}.localhost
         links:
-            - mysql
+            - mongodb
         build:
             context: ./docker/build/php-fpm
             dockerfile: Dockerfile
@@ -37,44 +37,81 @@ services:
             - COMPOSER_MEMORY_LIMIT=-1
             #- PHP_IDE_CONFIG:serverName=Xdebug
         depends_on:
-            -   mysql
+            - mongodb
         user: 1000:1000
         networks:
             - MyNetwork
 
-    mysql:
-        container_name: app_mysql
-        command: --init-file /docker-entrypoint-initdb.d/structure.sql
-        env_file:
-          - .env
+    queue_worker:
+        container_name: queue-worker
         build:
-            context: ./docker/build/mysql
+            context: ./docker/build/php-fpm
             dockerfile: Dockerfile
-        ports:
-            - "${MYSQL_PORT}:${MYSQL_PORT}"
+        command: php artisan queue:work
         volumes:
-            - database:/var/lib/mysql
-            - ./database/initialization/structure.sql:/docker-entrypoint-initdb.d/structure.sql
-        environment:
-            - MYSQL_DATABASE=${MYSQL_DATABASE}
-            - MYSQL_USER=${MYSQL_USER}
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - ${APPLICATION}:/var/www/html
+        depends_on:
+            - app
+            - redis
+        user: 1000:1000
         networks:
             - MyNetwork
+
+    schedule_runner:
+        container_name: schedule-runner
+        restart: always
+        build:
+            context: ./docker/build/php-fpm
+            dockerfile: Dockerfile
+        command: php artisan schedule:run
+        volumes:
+            - ${APPLICATION}:/var/www/html
+        depends_on:
+            - app
+        user: 1000:1000
+        networks:
+            - MyNetwork
+
+    mongodb:
+        image: mongo
+        container_name: mongodb
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongodb-data:/data/db
+            - ./database/initialization/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+        networks:
+            - MyNetwork
+
     redis:
         container_name: app_redis
         env_file:
-          - .env
+            - .env
         hostname: laravel-ddd-example.redis
         image: redis
         ports:
-          - "${REDIS_PORT}:${REDIS_PORT}"
+            - "${REDIS_PORT}:${REDIS_PORT}"
         networks:
             - MyNetwork
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+        hostname: elasticsearch.localhost
+        container_name: elasticsearch
+        ports:
+            - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
+        environment:
+            discovery.type: "single-node"
+        networks:
+            - MyNetwork
+
 volumes:
-    database:
     esdata:
+    database:
+    mongodb-data:
 
 networks:
     MyNetwork:
