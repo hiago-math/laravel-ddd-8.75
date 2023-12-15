@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
     nginx_app:
-        container_name: app_nginx
+        container_name: ${APP_NAME}_nginx
         env_file:
             - .env
         build:
@@ -22,7 +22,7 @@ services:
             - MyNetwork
 
     app:
-        container_name: app
+        container_name: ${APP_NAME}_app
         hostname: ${APP_NAME}.localhost
         links:
             - mongodb
@@ -43,7 +43,7 @@ services:
             - MyNetwork
 
     queue_worker:
-        container_name: queue-worker
+        container_name: ${APP_NAME}_queue_worker
         build:
             context: ./docker/build/php-fpm
             dockerfile: Dockerfile
@@ -58,7 +58,7 @@ services:
             - MyNetwork
 
     schedule_runner:
-        container_name: schedule-runner
+        container_name: ${APP_NAME}_schedule_runner
         restart: always
         build:
             context: ./docker/build/php-fpm
@@ -74,9 +74,9 @@ services:
 
     mongodb:
         image: mongo
-        container_name: mongodb
+        container_name: ${APP_NAME}_mongodb
         ports:
-            - "27017:27017"
+            - "27018:27018"
         volumes:
             - mongodb-data:/data/db
             - ./database/initialization/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
@@ -87,7 +87,7 @@ services:
             - MyNetwork
 
     redis:
-        container_name: app_redis
+        container_name: ${APP_NAME}_redis
         env_file:
             - .env
         hostname: laravel-ddd-example.redis
@@ -100,7 +100,7 @@ services:
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
         hostname: elasticsearch.localhost
-        container_name: elasticsearch
+        container_name: ${APP_NAME}_elasticsearch
         ports:
             - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
         environment:

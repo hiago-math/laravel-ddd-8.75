@@ -16,7 +16,7 @@ start:
 	@echo "Gerando chave do projeto..."
 	@docker-compose exec app php artisan key:generate
 	@echo "Rodando migrate..."
-	@docker-compose exec app php artisan migrate
+	#@docker-compose exec app php artisan migrate
 	@echo "Comando 'make start' executado com sucesso."
 	@echo "URL API ${APP_URL}:${NGINX_HOST_HTTP_PORT}/api"
 	@echo "URL WEB ${APP_URL}:${NGINX_HOST_HTTP_PORT}"

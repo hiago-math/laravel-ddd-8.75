@@ -1,8 +1,13 @@
 <?php
 
+use Carbon\Carbon;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Jenssegers\Mongodb\Connection;
+use MongoDB\Driver\Exception\AuthenticationException;
 
 if (!function_exists('get_files_routes')) {
 
@@ -30,7 +35,7 @@ if (!function_exists('instantiate_class')) {
     /**
      * @param string $class
      * @return mixed
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     function instantiate_class(string $class): mixed
     {
@@ -107,16 +112,40 @@ if (!function_exists('send_log')) {
      * @param Exception $exception
      * @return void
      */
-    function send_log(string $messgae, array $options = [], string $type = "info", \Exception $exception = null)
+    function send_log(string $message, array $options = [], string $type = "info", \Exception $exception = null)
     {
+        $doctype = \Shared\Enums\DocTypesElasticsearchEnum::DOC;
         if (!is_null($exception)) {
-            $options['message'] = $exception->getMessage();
+            $options['message_exception'] = $exception->getMessage();
             $options['code'] = $exception->getCode();
             $options['file'] = $exception->getFile() . ": " . $exception->getLine();
             $options['trace'] = $exception->getTraceAsString();
+            $doctype = \Shared\Enums\DocTypesElasticsearchEnum::ERROR;
         }
 
-        Log::$type($messgae, $options);
+        Log::$type($message, $options);
+        $options['message'] = $message;
+
+        create_log_elastic($type, $doctype, $options);
+    }
+}
+
+if (!function_exists('create_log_elastic')) {
+
+    /**
+     * @param string $index
+     * @param string $doctype
+     * @param array $options
+     * @return void
+     * @throws BindingResolutionException
+     */
+    function create_log_elastic(string $index, string $doctype, array $options)
+    {
+        $logService = instantiate_class(\Domain\Logs\Interfaces\Services\ILogService::class);
+        $createElasticsearchDto = instantiate_class(\Shared\DTO\Elasticsearch\CreateElasticsearchDTO::class);
+
+        $createElasticsearchDto->register($index, $doctype, $options);
+        $logService->createLog($createElasticsearchDto);
     }
 }
 
@@ -176,6 +205,67 @@ if (!function_exists('remove_null_array')) {
         return array_filter($array, function ($value) {
             return $value !== null;
         });
+    }
+}
+
+if (!function_exists('get_hash_file')) {
+    /**
+     * @param string $binFile
+     * @return string
+     */
+    function get_hash_file(string $content): string
+    {
+        return hash('md5', $content);
+    }
+}
+
+if (!function_exists('db_mongo_check')) {
+
+    function db_mongo_check()
+    {
+        try {
+            $mongodb = new Connection(config('database.connections.mongodb'));;
+            $con = $mongodb->getMongoClient()->listDatabaseNames();
+            if (!empty($con)) return "Ok";
+            return "Error";
+        } catch (AuthenticationException $authenticationException) {
+            return "Error";
+        }
+    }
+}
+
+if (!function_exists('db_redis_check')) {
+
+    function db_redis_check()
+    {
+        try {
+            $client = new \Predis\Client([
+                'scheme' => 'tcp',
+                'host' => 'redis',
+                'port' => 6379,
+            ]);
+            $client->ping();
+            return "Ok";
+        } catch (\Exception $exception) {
+            return "Error";
+        }
+    }
+}
+
+if (!function_exists('time_start_app')) {
+
+    function time_start_app()
+    {
+        $timeStarted = Storage::get('uptime.txt');
+        return Carbon::parse($timeStarted)->timezone(config('app.timezone'))->diffForHumans();
+    }
+}
+
+if (!function_exists('memory_usage')) {
+
+    function memory_usage()
+    {
+        return round(memory_get_usage() / (1024 * 1024), 2) . ' MB';
     }
 }
 

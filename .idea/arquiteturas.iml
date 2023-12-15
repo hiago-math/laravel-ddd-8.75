@@ -21,6 +21,9 @@
       <sourceFolder url="file://$MODULE_DIR$/laravel-ddd-9/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
       <sourceFolder url="file://$MODULE_DIR$/symfony-ddd/src" isTestSource="false" packagePrefix="App\" />
       <sourceFolder url="file://$MODULE_DIR$/symfony-ddd/tests" isTestSource="true" packagePrefix="App\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/laravel-ddd-9/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/laravel-ddd-9/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/laravel-ddd-9/tests" isTestSource="true" packagePrefix="Tests\" />
       <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-8/vendor/asm89/stack-cors" />
@@ -277,6 +280,13 @@
       <excludeFolder url="file://$MODULE_DIR$/symfony-ddd/vendor/symfony/var-dumper" />
       <excludeFolder url="file://$MODULE_DIR$/symfony-ddd/vendor/symfony/var-exporter" />
       <excludeFolder url="file://$MODULE_DIR$/symfony-ddd/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/carbonphp/carbon-doctrine-types" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/jean85/pretty-package-versions" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/jenssegers/mongodb" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/mongodb/mongodb" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/predis/predis" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/symfony/polyfill-php73" />
+      <excludeFolder url="file://$MODULE_DIR$/laravel-ddd-9/vendor/symfony/polyfill-php81" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
